@@ -1,0 +1,27 @@
+const NewManualOrderRequestDTO = {
+  correo: "",
+  codposteador: "",
+  codtelefono: "",
+  codautora: "",
+  codlibro: "",
+  tippublicacion: "",
+  codescena: "",
+  codcuentatiktok: "",
+  codsonido: "",
+  desscenahook: "",
+  descaption: "",
+  destropo: "",
+  desslide1keywordshide: "",
+  desslide2keywordshide: "",
+  deshashtag: "",
+  despalote: "",
+  codimagenprincipal: null,
+  codimagenscreenshot: null,
+  codimagendialogo: null,
+  codvideo: null,
+  desinstrucciones: "",
+  fecplanposteo: "",
+  codestadoorden: "",
+};
+
+export default NewManualOrderRequestDTO;
