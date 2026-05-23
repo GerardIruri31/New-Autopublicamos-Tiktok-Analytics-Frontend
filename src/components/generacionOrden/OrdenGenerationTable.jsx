@@ -4,6 +4,7 @@ export default function OrdenGenerationTable({
   rows = [],
   columns = [],
   onRowClick,
+  footerAction = null,
 }) {
   const ROWS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,53 +166,62 @@ export default function OrdenGenerationTable({
       </div>
 
       {rows.length > 0 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 border-t border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
-          <button
-            type="button"
-            className={[
-              pagerBtnBase,
-              currentPage === 1 ? "cursor-not-allowed opacity-50" : "",
-              pagerBtnInactive,
-            ].join(" ")}
-            onClick={() => {
-              if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-            }}
-            disabled={currentPage === 1}
-            title="Previous Page"
-          >
-            ←
-          </button>
-
-          {pageNumbers.map((page) => (
+        <div className="border-t border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <button
-              key={page}
               type="button"
               className={[
                 pagerBtnBase,
-                currentPage === page ? pagerBtnActive : pagerBtnInactive,
+                currentPage === 1 ? "cursor-not-allowed opacity-50" : "",
+                pagerBtnInactive,
               ].join(" ")}
-              onClick={() => setCurrentPage(page)}
-              title={`Page ${page}`}
+              onClick={() => {
+                if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+              }}
+              disabled={currentPage === 1}
+              title="Previous Page"
             >
-              {page}
+              ←
             </button>
-          ))}
 
-          <button
-            type="button"
-            className={[
-              pagerBtnBase,
-              currentPage === totalPages ? "cursor-not-allowed opacity-50" : "",
-              pagerBtnInactive,
-            ].join(" ")}
-            onClick={() => {
-              if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-            }}
-            disabled={currentPage === totalPages}
-            title="Next Page"
-          >
-            →
-          </button>
+            {pageNumbers.map((page) => (
+              <button
+                key={page}
+                type="button"
+                className={[
+                  pagerBtnBase,
+                  currentPage === page ? pagerBtnActive : pagerBtnInactive,
+                ].join(" ")}
+                onClick={() => setCurrentPage(page)}
+                title={`Page ${page}`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              className={[
+                pagerBtnBase,
+                currentPage === totalPages
+                  ? "cursor-not-allowed opacity-50"
+                  : "",
+                pagerBtnInactive,
+              ].join(" ")}
+              onClick={() => {
+                if (currentPage < totalPages)
+                  setCurrentPage((prev) => prev + 1);
+              }}
+              disabled={currentPage === totalPages}
+              title="Next Page"
+            >
+              →
+            </button>
+          </div>
+
+          {footerAction && (
+            <div className="mt-6 flex justify-center">{footerAction}</div>
+          )}
         </div>
       )}
     </section>

@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useLayoutEffect,
+} from "react";
 import { createPortal } from "react-dom";
 
 export default function SelectField({
@@ -15,6 +21,7 @@ export default function SelectField({
   selectedDisplayClassName = "",
   selectedButtonClassName = "",
   placeholderClassName = "",
+  buttonWidthClassName = "",
 }) {
   const wrapperRef = useRef(null);
   const buttonRef = useRef(null);
@@ -64,18 +71,18 @@ export default function SelectField({
     );
 
     const top = shouldOpenAbove
-      ? Math.max(SIDE_PADDING, rect.top - GAP - maxHeight)
-      : rect.bottom + GAP;
+      ? Math.max(SIDE_PADDING, rect.top - GAP - maxHeight) + window.scrollY
+      : rect.bottom + GAP + window.scrollY;
 
     setDropdownStyle({
       top,
-      left,
+      left: left + window.scrollX,
       width,
       maxHeight,
     });
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) return;
     updateDropdownPosition();
   }, [open, normalizedOptions.length]);
@@ -86,11 +93,9 @@ export default function SelectField({
     const onUpdatePosition = () => updateDropdownPosition();
 
     window.addEventListener("resize", onUpdatePosition);
-    window.addEventListener("scroll", onUpdatePosition, true);
 
     return () => {
       window.removeEventListener("resize", onUpdatePosition);
-      window.removeEventListener("scroll", onUpdatePosition, true);
     };
   }, [open]);
 
@@ -125,7 +130,8 @@ export default function SelectField({
   const baseButtonClass =
     variant === "compact"
       ? [
-          "w-full rounded-lg bg-white/70 px-2 py-1.5 text-sm text-slate-900 text-center sm:w-[105px]",
+          buttonWidthClassName || "w-full sm:w-[105px]",
+          "rounded-lg bg-white/70 px-2 py-1.5 text-sm text-slate-900 text-center",
           "shadow-sm ring-1 ring-slate-200",
           "focus:outline-none focus:ring-2 focus:ring-slate-900/10",
           disabled
@@ -199,7 +205,14 @@ export default function SelectField({
             disabled={!!disabled}
             onClick={() => {
               if (disabled) return;
-              setOpen((prev) => !prev);
+
+              if (open) {
+                setOpen(false);
+                return;
+              }
+
+              updateDropdownPosition();
+              setOpen(true);
             }}
             className={[
               baseButtonClass,
@@ -223,10 +236,10 @@ export default function SelectField({
                 <div
                   ref={dropdownRef}
                   style={{
-                    position: "fixed",
+                    position: "absolute",
                     top: dropdownStyle.top,
                     left: dropdownStyle.left,
-                    width: dropdownStyle.width,
+                    width: dropdownWidthClass ? undefined : dropdownStyle.width,
                     maxHeight: dropdownStyle.maxHeight,
                   }}
                   className={[

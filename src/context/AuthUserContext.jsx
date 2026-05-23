@@ -87,8 +87,6 @@ export const AuthUserProvider = ({ children }) => {
           ? raw.map((x) => String(x).toLowerCase())
           : [];
 
-        //console.log(list);
-
         setModules(list);
         setIsModulesReady(true);
         try {
@@ -135,7 +133,6 @@ export const AuthUserProvider = ({ children }) => {
 
         setRole(normalizedRole);
         setIsRoleReady(true);
-        console.log(normalizedRole);
         return normalizedRole;
       } catch (e) {
         console.error("[AuthUserContext] refreshRole failed:", e);
@@ -204,7 +201,6 @@ export const AuthUserProvider = ({ children }) => {
 
     //const payload = safeDecodeJwt(jwt);
     //console.log("[AuthUserContext] idToken payload decoded:", payload);
-    console.log(jwt);
   }, [jwt]);
 
   const getJwtExpMs = (token) => {

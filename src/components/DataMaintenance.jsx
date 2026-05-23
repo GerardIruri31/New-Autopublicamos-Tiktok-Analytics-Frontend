@@ -1551,7 +1551,13 @@ const DataMaintenance = () => {
       const data = await response.json();
       const fileName = file.name;
 
-      const backendError = data?.message || data?.error;
+      const backendError =
+        data?.error ||
+        data?.deserror ||
+        data?.errorMessage ||
+        data?.mensajeError ||
+        null;
+
       if (backendError) {
         // 1) log entries
         const entries = [
@@ -1604,7 +1610,10 @@ const DataMaintenance = () => {
       }
 
       /*console.log("API Response (DataMaintenance - handleImportExcel):", data);*/
-      const processedRecords = data["message"] || 0;
+      const processedRecords =
+        Number(
+          data?.insertedRecords ?? data?.recordsCount ?? data?.message ?? 0,
+        ) || 0;
 
       const entries =
         Object.keys(data).length === 0
@@ -1687,11 +1696,21 @@ const DataMaintenance = () => {
           "❌ Error at importing Excel file (DataMaintenance - handleImportExcel)",
         );
       } else {
+        addDataMaintenanceAlert({
+          title: "Excel import completed",
+          category: selectedCategory,
+          tableName: selectedCategory ? categories[selectedCategory] : null,
+          action: "Import Excel",
+          errorMessage: `Excel file imported successfully. Saved records: ${processedRecords}`,
+          recordsCount: processedRecords,
+          status: "success",
+        });
+
         notify("Success", "Excel file imported successfully.", "success");
         /*console.log(
-          "✅ Excel file imported with success (DataMaintenance - handleImportExcel): " +
-            fileName
-        );*/
+    "✅ Excel file imported with success (DataMaintenance - handleImportExcel): " +
+      fileName
+  );*/
       }
     } catch (error) {
       console.error(
@@ -1937,9 +1956,10 @@ const DataMaintenance = () => {
 
                       <div className="mt-3">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                          Error log
+                          {alert.status === "success"
+                            ? "Result log"
+                            : "Error log"}
                         </p>
-
                         <div className="mt-1 rounded-xl border border-slate-200 bg-white px-3 py-2">
                           <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap break-words">
                             {alert.errorMessage?.trim()

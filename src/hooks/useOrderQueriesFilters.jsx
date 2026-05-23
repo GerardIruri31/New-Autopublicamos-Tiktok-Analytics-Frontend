@@ -267,9 +267,6 @@ const normalizeOrderQueryRow = (row) => {
       null,
   };
 
-  console.log("tippublicacion final normalizado:", tippublicacion);
-  console.log("row normalizado:", normalizedRow);
-
   console.groupEnd();
 
   return normalizedRow;
@@ -649,7 +646,6 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
               },
             )
           : posteadoresRaw;
-        console.log(posteadores);
 
         setCatalog((prev) => ({
           ...prev,
@@ -1213,7 +1209,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     if (!token) return { ok: false, reason: "no-token" };
 
     setLoadingSearch(true);
-
+    console.log(requestPayload);
     try {
       const response = await searchOrderQueriesService({
         token,
@@ -1319,7 +1315,6 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     const codautora = cleanText(order?.codautora);
     const codlibro = cleanText(order?.codlibro);
     const tippublicacion = cleanText(order?.tippublicacion);
-    console.log(tippublicacion);
     const codposteador = cleanText(order?.codposteador);
 
     const codescenaLimpio = cleanSceneCodeForPalote({
@@ -1352,7 +1347,60 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     };
   };
 
-  const buildManualOrderRequestBody = ({ newValues, editCascadeStarted }) => {
+  const getOptionCodeByLabelOrCode = (options, value) => {
+    const cleanValue = String(value ?? "").trim();
+
+    if (!cleanValue) return null;
+
+    const selected = (options || []).find((item) => {
+      const code = String(
+        item?.value ??
+          item?.codigo ??
+          item?.code ??
+          item?.id ??
+          item?.codlibro ??
+          item?.tippublicacion ??
+          item?.codescena ??
+          "",
+      ).trim();
+
+      const label = String(
+        item?.label ??
+          item?.nombre ??
+          item?.descripcion ??
+          item?.nblibro ??
+          item?.deslibro ??
+          item?.despost ??
+          item?.desscena ??
+          item?.desescena ??
+          item?.sceneName ??
+          item?.bookName ??
+          item?.postTypeName ??
+          "",
+      ).trim();
+
+      return code === cleanValue || label === cleanValue;
+    });
+
+    if (!selected) return null;
+
+    return (
+      selected?.value ??
+      selected?.codigo ??
+      selected?.code ??
+      selected?.id ??
+      selected?.codlibro ??
+      selected?.tippublicacion ??
+      selected?.codescena ??
+      null
+    );
+  };
+
+  const buildManualOrderRequestBody = ({
+    newValues,
+    editCascadeStarted,
+    updatedOrder,
+  }) => {
     const hasValue = (value) => {
       if (value == null) return false;
       if (typeof value === "string") return value.trim() !== "";
@@ -1545,6 +1593,22 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     ) {
       body.codestadoorden = toNullableInteger(newValues.newCodEstadoOrden);
     }
+
+    body.codlibro = toNullableText(
+      editFilters.codlibro ?? draftOrder?.codlibro ?? selectedOrder?.codlibro,
+    );
+
+    body.tippublicacion = toNullableText(
+      editFilters.tippublicacion ??
+        draftOrder?.tippublicacion ??
+        selectedOrder?.tippublicacion,
+    );
+
+    body.codescena = toNullableText(
+      editFilters.codescena ??
+        draftOrder?.codescena ??
+        selectedOrder?.codescena,
+    );
 
     return body;
   };
@@ -1878,6 +1942,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
           const body = buildManualOrderRequestBody({
             newValues,
             editCascadeStarted,
+            updatedOrder,
           });
 
           const hasAnyChange = Object.entries(body).some(([key, value]) => {
@@ -2422,6 +2487,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
 
   return {
     filters,
+    requestPayload,
     catalog,
     editCatalog,
     editFilters,

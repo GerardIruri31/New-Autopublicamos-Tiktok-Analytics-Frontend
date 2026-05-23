@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-
+import { downloadOrderQueriesService } from "../services/order-queries/DownloadOrderQueriesService";
 import FiltersShell from "../components/generacionOrden/FiltersShell";
 import SelectField from "../components/generacionOrden/SelectField";
 import OrderDetailsModal from "../components/generacionOrden/OrderDetailsModal";
@@ -21,6 +21,7 @@ export default function OrderQueries() {
   const { jwt, role } = useContext(AuthUserContext);
 
   const [toast, setToast] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
   const isPaUser =
     String(role || "")
@@ -72,6 +73,7 @@ export default function OrderQueries() {
 
   const {
     filters,
+    requestPayload,
     catalog,
     editCatalog,
     editFilters,
@@ -110,6 +112,37 @@ export default function OrderQueries() {
     }
 
     actions.closeDetails();
+  };
+
+  const handleDownload = async () => {
+    if (!ordersRows || ordersRows.length === 0) {
+      notify("No data", "There is no data available to download.", "warning");
+      return;
+    }
+
+    setLoadingDownload(true);
+
+    try {
+      await downloadOrderQueriesService({
+        token: jwt,
+        request: requestPayload,
+      });
+
+      notify(
+        "Download completed",
+        "The Excel file was downloaded successfully.",
+        "success",
+      );
+    } catch (error) {
+      console.error("Order queries download failed:", error);
+      notify(
+        "Download failed",
+        error?.message || "Error downloading Order Queries Excel.",
+        "error",
+      );
+    } finally {
+      setLoadingDownload(false);
+    }
   };
 
   const statusOptions = [
@@ -515,7 +548,7 @@ export default function OrderQueries() {
                 ? "— Select book and post type first —"
                 : "— Select a scene —"
             }
-            dropdownWidthClass="min-w-full w-[320px]"
+            dropdownWidthClass="w-[320px]"
             onChange={(v) => actions.setCodEscena(v)}
           />
 
@@ -1248,11 +1281,26 @@ export default function OrderQueries() {
 
       <div className="mt-5">
         {ordersRows.length > 0 ? (
-          <OrdenGenerationTable
-            rows={ordersRows}
-            columns={ordersColumns}
-            onRowClick={handleRowClick}
-          />
+          <>
+            <OrdenGenerationTable
+              rows={ordersRows}
+              columns={ordersColumns}
+              onRowClick={handleRowClick}
+              footerAction={
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm ring-1 ring-emerald-700/20 transition hover:bg-emerald-700 active:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleDownload}
+                  disabled={
+                    loadingDownload || loadingSearch || ordersRows.length === 0
+                  }
+                  title="Download Excel"
+                >
+                  {loadingDownload ? "Downloading..." : "Download Excel"}
+                </button>
+              }
+            />
+          </>
         ) : dataLoaded ? (
           <NoDataFound
             title="No Data Found"

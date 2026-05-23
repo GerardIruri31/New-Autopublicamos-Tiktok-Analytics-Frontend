@@ -614,7 +614,7 @@ export default function GeneracionOrdenFiltersPage() {
                 ? "— Select book and post type first —"
                 : "— Select a scene —"
             }
-            dropdownWidthClass="min-w-full w-[320px]"
+            dropdownWidthClass="w-[320px]"
             onChange={(v) => actions.setCodEscena(v)}
           />
 
@@ -713,6 +713,7 @@ export default function GeneracionOrdenFiltersPage() {
             value={filters.flgprioridadescena ?? "N"}
             options={prioridadOptions}
             placeholder="No"
+            buttonWidthClassName="w-[72px]"
             dropdownWidthClass="w-[151px]"
             onChange={(v) => actions.setPrioridadEscenas(v)}
           />
@@ -722,6 +723,7 @@ export default function GeneracionOrdenFiltersPage() {
             value={filters.flgprioridasonido ?? "N"}
             options={prioridadOptions}
             placeholder="No"
+            buttonWidthClassName="w-[72px]"
             dropdownWidthClass="w-[151px]"
             onChange={(v) => actions.setPrioridadSonido(v)}
           />
@@ -732,6 +734,7 @@ export default function GeneracionOrdenFiltersPage() {
             value={filters.flgprioridadimagenvideo ?? "N"}
             options={prioridadOptions}
             placeholder="No"
+            buttonWidthClassName="w-[72px]"
             dropdownWidthClass="w-[151px]"
             onChange={(v) => actions.setPrioridadImagenVideo(v)}
           />

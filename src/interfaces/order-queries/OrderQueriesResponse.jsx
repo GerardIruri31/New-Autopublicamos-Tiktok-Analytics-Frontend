@@ -3,9 +3,12 @@ const OrderQueriesResponse = {
   codcabeceraordentrabajo: null,
   codautora: null,
   codlibro: null,
+  nCodlibro: null,
+
   tippublicacion: null,
   nTippublicacion: null,
   codescena: null,
+  nCodescena: null,
   codposteador: null,
   codtelefono: null,
   codcuentatiktok: null,
@@ -71,12 +74,14 @@ export function mapOrderQueriesResponseItem(item = {}) {
 
     codautora: item.codautora ?? null,
     codlibro: item.codlibro ?? null,
+    nCodlibro: item.nCodlibro ?? item.nCodLibro ?? item.deslibro ?? null,
 
     // FIX PRINCIPAL
     tippublicacion,
     nTippublicacion,
 
     codescena: item.codescena ?? null,
+    nCodescena: item.nCodescena ?? item.nCodEscena ?? item.desscena ?? null,
     codposteador: item.codposteador ?? null,
     codtelefono: item.codtelefono ?? null,
     codcuentatiktok: item.codcuentatiktok ?? null,

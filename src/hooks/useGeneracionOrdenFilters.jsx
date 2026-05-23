@@ -1214,7 +1214,6 @@ export function useGeneracionOrdenFilters({
     const selectedTelefono = (catalog.telefonos || []).find(
       (item) => item?.value === filters.codtelefono,
     );
-    console.log(selectedTelefono?.tiptelefono);
     return selectedTelefono?.tiptelefono ?? null;
   };
 
@@ -1723,7 +1722,7 @@ export function useGeneracionOrdenFilters({
       return cleaned === "" ? null : cleaned;
     };
 
-    return {
+    const body = {
       ...NewManualOrderRequestDTO,
       correo: userEmail?.trim()?.toLowerCase() || "",
       codposteador: order?.codposteador?.trim() || "",
@@ -1761,6 +1760,28 @@ export function useGeneracionOrdenFilters({
       fecplanposteo: order?.fecplanposteo || "",
       codestadoorden: toNullableInteger(order?.codestadoorden),
     };
+    body.codlibro = toNullableText(
+      editFilters.codlibro ??
+        order?.codlibro ??
+        draftOrder?.codlibro ??
+        selectedOrder?.codlibro,
+    );
+
+    body.tippublicacion = toNullableText(
+      editFilters.tippublicacion ??
+        order?.tippublicacion ??
+        draftOrder?.tippublicacion ??
+        selectedOrder?.tippublicacion,
+    );
+
+    body.codescena = toNullableText(
+      editFilters.codescena ??
+        order?.codescena ??
+        draftOrder?.codescena ??
+        selectedOrder?.codescena,
+    );
+
+    return body;
   };
 
   const buildAutoPalote = useCallback((order) => {
@@ -1988,14 +2009,10 @@ export function useGeneracionOrdenFilters({
             ctdordenesmetamanual: filters.ctdordenesmetamanual,
           };
 
-          console.log(request);
-
           const response = await GenerateOrdenService({
             token,
             request,
           });
-
-          console.log(response);
 
           const paName =
             (catalog?.posteadores || []).find((item) => {
@@ -2604,12 +2621,6 @@ export function useGeneracionOrdenFilters({
           selectedOrder?.codordentrabajo ??
           updatedOrder?.codordentrabajo;
 
-        console.log("EDIT SAVE codordentrabajo:", {
-          draft: draftOrder?.codordentrabajo,
-          selected: selectedOrder?.codordentrabajo,
-          updated: updatedOrder?.codordentrabajo,
-          final: codordentrabajo,
-        });
         if (!codordentrabajo) {
           notifyManualValidation?.(
             "Error",
