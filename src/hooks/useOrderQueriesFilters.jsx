@@ -169,6 +169,7 @@ const normalizeOrderQueryRow = (row) => {
     null;
 
   const nTippublicacion =
+    row?.ntippublicacion ??
     row?.nTippublicacion ??
     row?.nCodtippublicacion ??
     row?.nCodTippublicacion ??
@@ -207,6 +208,7 @@ const normalizeOrderQueryRow = (row) => {
       null,
 
     nCodlibro:
+      row?.ncodlibro ??
       row?.nCodlibro ??
       row?.nCodLibro ??
       row?.deslibro ??
@@ -217,6 +219,7 @@ const normalizeOrderQueryRow = (row) => {
       null,
 
     nCodescena:
+      row?.ncodescena ??
       row?.nCodescena ??
       row?.nCodEscena ??
       row?.desscena ??
@@ -1205,6 +1208,111 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     setGenerationAlerts((prev) => [nuevaAlerta, ...prev]);
   };
 
+  const getCatalogOptionLabel = (options, value) => {
+    const cleanValue = String(value ?? "").trim();
+
+    if (!cleanValue) return null;
+
+    const selected = (options || []).find((item) => {
+      const optionValue =
+        item?.value ??
+        item?.codigo ??
+        item?.code ??
+        item?.id ??
+        item?.codlibro ??
+        item?.tippublicacion ??
+        item?.codescena ??
+        "";
+
+      return String(optionValue).trim() === cleanValue;
+    });
+
+    return (
+      selected?.label ??
+      selected?.nombre ??
+      selected?.descripcion ??
+      selected?.nblibro ??
+      selected?.deslibro ??
+      selected?.despost ??
+      selected?.destipoposteo ??
+      selected?.desscena ??
+      selected?.desescena ??
+      selected?.sceneName ??
+      selected?.bookName ??
+      selected?.postTypeName ??
+      null
+    );
+  };
+
+  const getVisualLabelOrCurrent = (options, codeValue, currentValue) => {
+    const cleanCode = String(codeValue ?? "").trim();
+    const cleanCurrent = String(currentValue ?? "").trim();
+
+    const catalogLabel = getCatalogOptionLabel(options, codeValue);
+    const cleanCatalogLabel = String(catalogLabel ?? "").trim();
+
+    if (cleanCatalogLabel && cleanCatalogLabel !== cleanCode) {
+      return catalogLabel;
+    }
+
+    if (cleanCurrent && cleanCurrent !== cleanCode) {
+      return currentValue;
+    }
+
+    return currentValue ?? codeValue ?? null;
+  };
+
+  const hydrateOrderVisualLabels = (row) => {
+    const normalized = normalizeOrderQueryRow(row);
+    console.log(normalized);
+    const codlibro =
+      normalized?.codlibro ??
+      normalized?.codLibro ??
+      row?.codlibro ??
+      row?.codLibro ??
+      null;
+
+    const tippublicacion =
+      normalized?.tippublicacion ??
+      normalized?.tipPublicacion ??
+      row?.tippublicacion ??
+      row?.tipPublicacion ??
+      null;
+
+    const codescena =
+      normalized?.codescena ??
+      normalized?.codEscena ??
+      row?.codescena ??
+      row?.codEscena ??
+      null;
+
+    return {
+      ...normalized,
+
+      codlibro,
+      tippublicacion,
+      codescena,
+
+      nCodlibro: getVisualLabelOrCurrent(
+        catalog.libros,
+        codlibro,
+        normalized.nCodlibro,
+      ),
+
+      nTippublicacion: getVisualLabelOrCurrent(
+        catalog.tiposPosteo,
+        tippublicacion,
+        normalized.nTippublicacion,
+      ),
+
+      nCodescena: getVisualLabelOrCurrent(
+        catalog.escenas,
+        codescena,
+        normalized.nCodescena,
+      ),
+    };
+  };
+
   const runSearch = async () => {
     if (!token) return { ok: false, reason: "no-token" };
 
@@ -1217,7 +1325,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
       });
 
       const rows = Array.isArray(response)
-        ? response.map(normalizeOrderQueryRow)
+        ? response.map(hydrateOrderVisualLabels)
         : [];
 
       const columns = dummyColumns;
@@ -1991,17 +2099,84 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
               selected?.label ??
               selected?.nombre ??
               selected?.descripcion ??
+              selected?.nCodposteador ??
+              selected?.nCodautora ??
+              selected?.nCodlibro ??
+              selected?.nCodescena ??
+              selected?.nTippublicacion ??
+              selected?.ncodlibro ??
+              selected?.ncodescena ??
+              selected?.ntippublicacion ??
               selected?.nbposteador ??
               selected?.nbautora ??
               selected?.nblibro ??
               selected?.deslibro ??
+              selected?.destipoposteo ??
               selected?.despost ??
+              selected?.desscena ??
               selected?.desescena ??
+              selected?.bookName ??
+              selected?.postTypeName ??
+              selected?.sceneName ??
               null
             );
           };
 
-          const updatedRowForTable = normalizeOrderQueryRow({
+          const finalCodLibro = editCascadeStarted
+            ? updatedOrder?.codlibro
+            : (updatedOrderFromBack?.codlibro ??
+              updatedOrder?.codlibro ??
+              draftOrder?.codlibro);
+
+          const finalTipPublicacion = editCascadeStarted
+            ? updatedOrder?.tippublicacion
+            : (updatedOrderFromBack?.tippublicacion ??
+              updatedOrder?.tippublicacion ??
+              draftOrder?.tippublicacion);
+
+          const finalCodEscena = editCascadeStarted
+            ? updatedOrder?.codescena
+            : (updatedOrderFromBack?.codescena ??
+              updatedOrder?.codescena ??
+              draftOrder?.codescena);
+
+          const finalNCodLibro =
+            getOptionLabel(
+              [...(editCatalog?.libros || []), ...(catalog?.libros || [])],
+              finalCodLibro,
+            ) ??
+            updatedOrderFromBack?.ncodlibro ??
+            updatedOrderFromBack?.nCodlibro ??
+            draftOrder?.ncodlibro ??
+            draftOrder?.nCodlibro ??
+            finalCodLibro;
+
+          const finalNTipPublicacion =
+            getOptionLabel(
+              [
+                ...(editCatalog?.tiposPosteo || []),
+                ...(catalog?.tiposPosteo || []),
+              ],
+              finalTipPublicacion,
+            ) ??
+            updatedOrderFromBack?.ntippublicacion ??
+            updatedOrderFromBack?.nTippublicacion ??
+            draftOrder?.ntippublicacion ??
+            draftOrder?.nTippublicacion ??
+            finalTipPublicacion;
+
+          const finalNCodEscena =
+            getOptionLabel(
+              [...(editCatalog?.escenas || []), ...(catalog?.escenas || [])],
+              finalCodEscena,
+            ) ??
+            updatedOrderFromBack?.ncodescena ??
+            updatedOrderFromBack?.nCodescena ??
+            draftOrder?.ncodescena ??
+            draftOrder?.nCodescena ??
+            finalCodEscena;
+
+          let updatedRowForTable = hydrateOrderVisualLabels({
             ...draftOrder,
             ...updatedOrderFromBack,
 
@@ -2039,86 +2214,47 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
               ) ??
               draftOrder?.nCodautora,
 
-            codlibro:
-              updatedOrderFromBack?.codlibro ??
-              updatedOrder?.codlibro ??
-              draftOrder?.codlibro,
+            codlibro: finalCodLibro,
 
             nCodlibro:
+              finalNCodLibro ??
+              updatedOrderFromBack?.ncodlibro ??
               updatedOrderFromBack?.nCodlibro ??
               getOptionLabel(
                 [...(editCatalog?.libros || []), ...(catalog?.libros || [])],
-                updatedOrder?.codlibro,
+                finalCodLibro,
               ) ??
+              draftOrder?.ncodlibro ??
               draftOrder?.nCodlibro,
 
-            tippublicacion:
-              updatedOrderFromBack?.tippublicacion ??
-              updatedOrder?.tippublicacion ??
-              draftOrder?.tippublicacion,
+            tippublicacion: finalTipPublicacion,
 
-            nTippublicacion: (() => {
-              const finalTipPublicacion =
-                updatedOrderFromBack?.tippublicacion ??
-                updatedOrder?.tippublicacion ??
-                draftOrder?.tippublicacion;
-
-              const labelFromCatalog = getOptionLabel(
+            nTippublicacion:
+              finalNTipPublicacion ??
+              updatedOrderFromBack?.ntippublicacion ??
+              updatedOrderFromBack?.nTippublicacion ??
+              getOptionLabel(
                 [
                   ...(editCatalog?.tiposPosteo || []),
                   ...(catalog?.tiposPosteo || []),
                 ],
                 finalTipPublicacion,
-              );
+              ) ??
+              draftOrder?.ntippublicacion ??
+              draftOrder?.nTippublicacion ??
+              finalTipPublicacion,
 
-              const labelFromDraft =
-                draftOrder?.nTippublicacion ??
-                draftOrder?.nCodtippublicacion ??
-                draftOrder?.nCodTippublicacion ??
-                draftOrder?.nCodTipoPosteo ??
-                draftOrder?.destipoposteo ??
-                draftOrder?.despost ??
-                null;
-
-              const labelFromBack =
-                updatedOrderFromBack?.nTippublicacion ??
-                updatedOrderFromBack?.nCodtippublicacion ??
-                updatedOrderFromBack?.nCodTippublicacion ??
-                updatedOrderFromBack?.nCodTipoPosteo ??
-                updatedOrderFromBack?.destipoposteo ??
-                updatedOrderFromBack?.despost ??
-                null;
-
-              const isRealLabel = (value) => {
-                const text = String(value ?? "").trim();
-                const code = String(finalTipPublicacion ?? "").trim();
-
-                return text !== "" && text !== code;
-              };
-
-              if (isRealLabel(labelFromCatalog)) return labelFromCatalog;
-              if (isRealLabel(labelFromDraft)) return labelFromDraft;
-              if (isRealLabel(labelFromBack)) return labelFromBack;
-
-              return (
-                labelFromCatalog ??
-                labelFromDraft ??
-                labelFromBack ??
-                finalTipPublicacion
-              );
-            })(),
-
-            codescena:
-              updatedOrderFromBack?.codescena ??
-              updatedOrder?.codescena ??
-              draftOrder?.codescena,
+            codescena: finalCodEscena,
 
             nCodescena:
+              finalNCodEscena ??
+              updatedOrderFromBack?.ncodescena ??
               updatedOrderFromBack?.nCodescena ??
               getOptionLabel(
                 [...(editCatalog?.escenas || []), ...(catalog?.escenas || [])],
-                updatedOrder?.codescena,
+                finalCodEscena,
               ) ??
+              draftOrder?.ncodescena ??
               draftOrder?.nCodescena,
 
             codsonido:
@@ -2180,6 +2316,23 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
               updatedOrder?.codvideo ??
               draftOrder?.nCodvideo,
           });
+
+          updatedRowForTable = {
+            ...updatedRowForTable,
+
+            codlibro: finalCodLibro,
+            tippublicacion: finalTipPublicacion,
+            codescena: finalCodEscena,
+
+            nCodlibro: finalNCodLibro,
+            ncodlibro: finalNCodLibro,
+
+            nTippublicacion: finalNTipPublicacion,
+            ntippublicacion: finalNTipPublicacion,
+
+            nCodescena: finalNCodEscena,
+            ncodescena: finalNCodEscena,
+          };
 
           setOrdersRows((prev) =>
             (prev || []).map((row) =>

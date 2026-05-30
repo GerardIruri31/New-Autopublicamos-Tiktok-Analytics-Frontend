@@ -65,6 +65,45 @@ export default function OrdenGenerationTable({
       .toLowerCase()
       .replace(/[\s_()-]/g, "");
 
+  const getMobileColumnWidthClass = (key) => {
+    const normalizedKey = getNormalizedKey(key);
+
+    const mobileWideColumns = new Set([
+      "desscenahook",
+      "destropo",
+      "descaption",
+      "desslide1keywordshide",
+      "desslide2keywordshide",
+      "deshashtag",
+      "desinstrucciones",
+      "desdatoobligincompleto",
+      "deslogerrororden",
+    ]);
+
+    const mobileUrlColumns = new Set([
+      "codsonido",
+      "ncodsonido",
+      "codimagenprincipal",
+      "ncodimagenprincipal",
+      "codimagenscreenshot",
+      "ncodimagenscreenshot",
+      "codimagendialogo",
+      "ncodimagendialogo",
+      "codvideo",
+      "ncodvideo",
+    ]);
+
+    if (mobileWideColumns.has(normalizedKey)) {
+      return "w-[280px] min-w-[280px] max-w-[280px] sm:w-auto sm:min-w-0 sm:max-w-none";
+    }
+
+    if (mobileUrlColumns.has(normalizedKey)) {
+      return "w-[400px] min-w-[400px] max-w-[400px] sm:w-auto sm:min-w-0 sm:max-w-none";
+    }
+
+    return "";
+  };
+
   const getCellRawValue = (row, key) => {
     if (!row) return null;
 
@@ -110,7 +149,7 @@ export default function OrdenGenerationTable({
     if (isTruncatable) {
       return (
         <span
-          className="block max-w-[280px] select-text whitespace-normal break-words sm:max-w-[420px] sm:truncate"
+          className="block w-full overflow-hidden text-ellipsis whitespace-nowrap text-center select-text sm:max-w-[420px] sm:truncate"
           title={String(val)}
         >
           {String(val)}
@@ -134,7 +173,10 @@ export default function OrdenGenerationTable({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className="px-3 py-3 text-left font-semibold whitespace-nowrap sm:px-4 sm:text-center"
+                  className={[
+                    "px-3 py-3 text-center font-semibold whitespace-nowrap sm:px-4 sm:text-center",
+                    getMobileColumnWidthClass(col.key),
+                  ].join(" ")}
                   title={col.key}
                 >
                   {col.header}
@@ -154,7 +196,10 @@ export default function OrdenGenerationTable({
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className="px-3 py-3 align-top text-left whitespace-normal break-words select-text sm:px-4 sm:text-center"
+                    className={[
+                      "px-3 py-3 align-top text-center whitespace-normal break-words select-text sm:px-4 sm:text-center",
+                      getMobileColumnWidthClass(col.key),
+                    ].join(" ")}
                   >
                     {renderCellValue(col, getCellRawValue(row, col.key))}
                   </td>
