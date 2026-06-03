@@ -4,6 +4,7 @@ export default function OrdenGenerationTable({
   rows = [],
   columns = [],
   onRowClick,
+  onDeleteRow,
   footerAction = null,
 }) {
   const ROWS_PER_PAGE = 10;
@@ -41,6 +42,7 @@ export default function OrdenGenerationTable({
   const TRUNCATE_COLUMNS = new Set([
     "codsonido",
     "ncodsonido",
+
     "desscenahook",
     "descaption",
     "destropo",
@@ -60,6 +62,27 @@ export default function OrdenGenerationTable({
     "deslogerrororden",
   ]);
 
+  const STATUS_LABEL_MAP = {
+    1: "Assigned",
+    2: "Flagged",
+    3: "-100 Views",
+    4: "Posted",
+    5: "Drafted",
+    Assigned: "Assigned",
+    Flagged: "Flagged",
+    "-100 Views": "-100 Views",
+    Posted: "Posted",
+    Drafted: "Drafted",
+  };
+
+  const getStatusLabel = (value) => {
+    const cleanValue = String(value ?? "").trim();
+
+    if (!cleanValue || cleanValue === "-") return "null";
+
+    return STATUS_LABEL_MAP[cleanValue] ?? cleanValue;
+  };
+
   const getNormalizedKey = (key) =>
     String(key ?? "")
       .toLowerCase()
@@ -69,6 +92,9 @@ export default function OrdenGenerationTable({
     const normalizedKey = getNormalizedKey(key);
 
     const mobileWideColumns = new Set([
+      "ncodescena",
+
+      "ncodposteador",
       "desscenahook",
       "destropo",
       "descaption",
@@ -134,6 +160,20 @@ export default function OrdenGenerationTable({
       );
     }
 
+    if (key === "codestadoorden") {
+      return getStatusLabel(
+        row.nCodestadoorden ??
+          row.nCodEstadoOrden ??
+          row.desestadoorden ??
+          row.desEstadoOrden ??
+          row.estadoorden ??
+          row.estadoOrden ??
+          row.codestadoorden ??
+          row.codEstadoOrden ??
+          null,
+      );
+    }
+
     return row?.[key];
   };
 
@@ -182,6 +222,10 @@ export default function OrdenGenerationTable({
                   {col.header}
                 </th>
               ))}
+
+              <th className="px-3 py-3 text-center font-semibold whitespace-nowrap sm:px-4">
+                Delete?
+              </th>
             </tr>
           </thead>
 
@@ -204,6 +248,51 @@ export default function OrdenGenerationTable({
                     {renderCellValue(col, getCellRawValue(row, col.key))}
                   </td>
                 ))}
+                <td className="px-3 py-3.5 align-top text-center sm:px-4">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteRow?.(row);
+                    }}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-600 text-white shadow-sm ring-1 ring-rose-600/20 transition hover:bg-rose-700 active:bg-rose-800"
+                    title="Delete order"
+                    aria-label="Delete order"
+                  >
+                    <svg
+                      className="h-4.5 w-4.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 6h18"
+                      />
+                      <path
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 6V4h8v2"
+                      />
+                      <path
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 6l-1 14H6L5 6"
+                      />
+                      <path
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 11v5M14 11v5"
+                      />
+                    </svg>
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

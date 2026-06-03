@@ -13,12 +13,13 @@ import OrderDetailsModal from "../components/generacionOrden/OrderDetailsModal";
 import NoDataFound from "../components/generacionOrden/NoDataFound";
 import OrdenGenerationTable from "../components/generacionOrden/OrdenGenerationTable";
 import NotificationToast from "../components/common/NotificationToast";
+import { deleteOrderService } from "../services/order-queries/DeleteOrderService";
 
 import { AuthUserContext } from "../context/AuthUserContext";
 import { useOrderQueriesFilters } from "../hooks/useOrderQueriesFilters";
 
 export default function OrderQueries() {
-  const { jwt, role } = useContext(AuthUserContext);
+  const { jwt, role, userEmail } = useContext(AuthUserContext);
 
   const [toast, setToast] = useState(null);
   const [loadingDownload, setLoadingDownload] = useState(false);
@@ -150,6 +151,7 @@ export default function OrderQueries() {
     { value: 2, label: "Flagged" },
     { value: 3, label: "-100 Views" },
     { value: 4, label: "Posted" },
+    { value: 5, label: "Drafted" },
   ];
 
   const btnClear =
@@ -865,6 +867,42 @@ export default function OrderQueries() {
     );
   };
 
+  const handleDeleteOrder = async (order) => {
+    const request = {
+      correo: userEmail,
+      codordentrabajo: order.codordentrabajo,
+      codescena: order.codescena,
+      tippublicacion: order.tippublicacion,
+      codlibro: order.codlibro,
+      codcuentatiktok: order.codcuentatiktok,
+      codtelefono: order.codtelefono,
+      codimagenprincipal: order.codimagenprincipal,
+      codimagenscreenshot: order.codimagenscreenshot,
+      codimagendialogo: order.codimagendialogo,
+      codvideo: order.codvideo,
+      codsonido: order.nCodsonido,
+    };
+
+    try {
+      await deleteOrderService({
+        token: jwt,
+        request,
+      });
+
+      actions.removeOrderRow(order.codordentrabajo);
+
+      notify("Order deleted", "The order was deleted successfully.", "success");
+    } catch (error) {
+      console.error("Delete order failed:", error);
+
+      notify(
+        "Delete failed",
+        error?.message || "Error deleting order.",
+        "error",
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-slate-100/70">
       <NotificationToast toast={toast} onClose={() => setToast(null)} />
@@ -1286,6 +1324,7 @@ export default function OrderQueries() {
               rows={ordersRows}
               columns={ordersColumns}
               onRowClick={handleRowClick}
+              onDeleteRow={handleDeleteOrder}
               footerAction={
                 <button
                   type="button"

@@ -1728,6 +1728,46 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
       closeNotifications: () => setNotifOpen(false),
       clearNotifications: () => setGenerationAlerts([]),
 
+      removeOrderRow: (codordentrabajo) => {
+        setOrdersRows((prev) =>
+          (prev || []).filter(
+            (row) => String(row?.codordentrabajo) !== String(codordentrabajo),
+          ),
+        );
+
+        setSelectedOrder((prev) =>
+          String(prev?.codordentrabajo) === String(codordentrabajo)
+            ? null
+            : prev,
+        );
+
+        setDraftOrder((prev) =>
+          String(prev?.codordentrabajo) === String(codordentrabajo)
+            ? null
+            : prev,
+        );
+
+        setDetailsOpen((prev) => {
+          if (
+            String(selectedOrder?.codordentrabajo) === String(codordentrabajo)
+          ) {
+            return false;
+          }
+
+          return prev;
+        });
+
+        setIsEditing((prev) => {
+          if (
+            String(selectedOrder?.codordentrabajo) === String(codordentrabajo)
+          ) {
+            return false;
+          }
+
+          return prev;
+        });
+      },
+
       openDetails: (row) => {
         setSelectedOrder(row);
         setDraftOrder(row ? { ...row } : null);
@@ -2315,6 +2355,20 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
               updatedOrder?.nCodvideo ??
               updatedOrder?.codvideo ??
               draftOrder?.nCodvideo,
+
+            codestadoorden:
+              updatedOrderFromBack?.codestadoorden ??
+              updatedOrderFromBack?.codEstadoOrden ??
+              updatedOrder?.codestadoorden ??
+              draftOrder?.codestadoorden,
+
+            nCodestadoorden:
+              updatedOrderFromBack?.nCodestadoorden ??
+              updatedOrderFromBack?.nCodEstadoOrden ??
+              updatedOrderFromBack?.desestadoorden ??
+              updatedOrderFromBack?.desEstadoOrden ??
+              updatedOrder?.nCodestadoorden ??
+              draftOrder?.nCodestadoorden,
           });
 
           updatedRowForTable = {
@@ -2332,6 +2386,19 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
 
             nCodescena: finalNCodEscena,
             ncodescena: finalNCodEscena,
+
+            codestadoorden:
+              updatedOrderFromBack?.codestadoorden ??
+              updatedOrderFromBack?.codEstadoOrden ??
+              updatedOrder?.codestadoorden ??
+              draftOrder?.codestadoorden,
+
+            nCodestadoorden:
+              updatedOrderFromBack?.nCodestadoorden ??
+              updatedOrderFromBack?.nCodEstadoOrden ??
+              updatedOrderFromBack?.desestadoorden ??
+              updatedOrderFromBack?.desEstadoOrden ??
+              updatedRowForTable?.nCodestadoorden,
           };
 
           setOrdersRows((prev) =>

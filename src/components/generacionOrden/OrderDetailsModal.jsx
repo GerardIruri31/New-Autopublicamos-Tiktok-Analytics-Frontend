@@ -60,6 +60,12 @@ export default function OrderDetailsModal({
       buttonClassName: "bg-emerald-100 ring-1 ring-emerald-200",
       optionClassName: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     },
+    {
+      value: 5,
+      label: "Drafted",
+      buttonClassName: "bg-amber-100 ring-1 ring-amber-200",
+      optionClassName: "bg-amber-50 text-amber-700 hover:bg-amber-100",
+    },
   ];
 
   const statusStyleMap = {
@@ -68,10 +74,12 @@ export default function OrderDetailsModal({
     2: "bg-rose-100 text-rose-700 ring-1 ring-rose-200",
     3: "bg-violet-100 text-violet-700 ring-1 ring-violet-200",
     4: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
+    5: "bg-amber-100 text-amber-700 ring-1 ring-amber-200",
     Assigned: "bg-sky-100 text-sky-700 ring-1 ring-sky-200",
     Flagged: "bg-rose-100 text-rose-700 ring-1 ring-rose-200",
     "-100 Views": "bg-violet-100 text-violet-700 ring-1 ring-violet-200",
     Posted: "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200",
+    Drafted: "bg-amber-100 text-amber-700 ring-1 ring-amber-200",
   };
 
   const getStatusPillClass = (value) =>
