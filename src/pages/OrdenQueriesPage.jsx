@@ -152,6 +152,7 @@ export default function OrderQueries() {
     { value: 3, label: "-100 Views" },
     { value: 4, label: "Posted" },
     { value: 5, label: "Drafted" },
+    { value: 6, label: "Deleted" },
   ];
 
   const btnClear =
@@ -305,7 +306,7 @@ export default function OrderQueries() {
   };
 
   const yesNoOptions = [
-    { value: "Y", label: "Y" },
+    { value: "S", label: "Y" },
     { value: "N", label: "N" },
   ];
 
@@ -876,11 +877,11 @@ export default function OrderQueries() {
       codlibro: order.codlibro,
       codcuentatiktok: order.codcuentatiktok,
       codtelefono: order.codtelefono,
-      codimagenprincipal: order.codimagenprincipal,
-      codimagenscreenshot: order.codimagenscreenshot,
-      codimagendialogo: order.codimagendialogo,
-      codvideo: order.codvideo,
-      codsonido: order.nCodsonido,
+      codimagenprincipal: order.ncodimagenprincipal,
+      codimagenscreenshot: order.ncodimagenscreenshot,
+      codimagendialogo: order.ncodimagendialogo,
+      codvideo: order.ncodvideo,
+      codsonido: order.ncodsonido,
     };
 
     try {
@@ -1324,7 +1325,15 @@ export default function OrderQueries() {
               rows={ordersRows}
               columns={ordersColumns}
               onRowClick={handleRowClick}
-              onDeleteRow={handleDeleteOrder}
+              onDeleteRow={(order) => {
+                openConfirm({
+                  title: "Confirm delete",
+                  message: `Are you sure you want to delete order #${order?.codordentrabajo ?? "N/A"}? This action cannot be undone`,
+                  confirmText: "Delete",
+                  danger: true,
+                  onConfirm: () => handleDeleteOrder(order),
+                });
+              }}
               footerAction={
                 <button
                   type="button"

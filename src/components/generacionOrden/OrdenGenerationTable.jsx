@@ -68,11 +68,13 @@ export default function OrdenGenerationTable({
     3: "-100 Views",
     4: "Posted",
     5: "Drafted",
+    6: "Deleted",
     Assigned: "Assigned",
     Flagged: "Flagged",
     "-100 Views": "-100 Views",
     Posted: "Posted",
     Drafted: "Drafted",
+    Deleted: "Deleted",
   };
 
   const getStatusLabel = (value) => {
@@ -130,6 +132,118 @@ export default function OrdenGenerationTable({
     return "";
   };
 
+  const isHttpUrlText = (value) => {
+    const text = String(value ?? "").trim();
+
+    if (!text) return false;
+    if (text.toLowerCase() === "null") return false;
+
+    return text.startsWith("http://") || text.startsWith("https://");
+  };
+
+  const getSoundUrlCellValue = (row) => {
+    const candidates = [
+      row?.codsonido,
+      row?.nCodsonido,
+      row?.ncodsonido,
+      row?.codSonido,
+      row?.nCodSonido,
+      row?.urlsonido,
+      row?.soundUrl,
+    ];
+
+    return candidates.find((value) => isHttpUrlText(value)) ?? null;
+  };
+
+  const getMediaUrlCellValue = (row, key) => {
+    const normalizedKey = getNormalizedKey(key);
+
+    const mediaCandidatesByKey = {
+      codimagenprincipal: [
+        row?.codimagenprincipal,
+        row?.nCodimagenprincipal,
+        row?.ncodimagenprincipal,
+        row?.codImagenPrincipal,
+        row?.nCodImagenPrincipal,
+        row?.urlimagenprincipal,
+        row?.mainImageUrl,
+      ],
+      ncodimagenprincipal: [
+        row?.codimagenprincipal,
+        row?.nCodimagenprincipal,
+        row?.ncodimagenprincipal,
+        row?.codImagenPrincipal,
+        row?.nCodImagenPrincipal,
+        row?.urlimagenprincipal,
+        row?.mainImageUrl,
+      ],
+
+      codimagenscreenshot: [
+        row?.codimagenscreenshot,
+        row?.nCodimagenscreenshot,
+        row?.ncodimagenscreenshot,
+        row?.codImagenScreenshot,
+        row?.nCodImagenScreenshot,
+        row?.urlimagenscreenshot,
+        row?.screenshotImageUrl,
+      ],
+      ncodimagenscreenshot: [
+        row?.codimagenscreenshot,
+        row?.nCodimagenscreenshot,
+        row?.ncodimagenscreenshot,
+        row?.codImagenScreenshot,
+        row?.nCodImagenScreenshot,
+        row?.urlimagenscreenshot,
+        row?.screenshotImageUrl,
+      ],
+
+      codimagendialogo: [
+        row?.codimagendialogo,
+        row?.nCodimagendialogo,
+        row?.ncodimagendialogo,
+        row?.codImagenDialogo,
+        row?.nCodImagenDialogo,
+        row?.urlimagendialogo,
+        row?.dialogImageUrl,
+      ],
+      ncodimagendialogo: [
+        row?.codimagendialogo,
+        row?.nCodimagendialogo,
+        row?.ncodimagendialogo,
+        row?.codImagenDialogo,
+        row?.nCodImagenDialogo,
+        row?.urlimagendialogo,
+        row?.dialogImageUrl,
+      ],
+
+      codvideo: [
+        row?.codvideo,
+        row?.nCodvideo,
+        row?.ncodvideo,
+        row?.codVideo,
+        row?.nCodVideo,
+        row?.urlvideo,
+        row?.videoUrl,
+      ],
+      ncodvideo: [
+        row?.codvideo,
+        row?.nCodvideo,
+        row?.ncodvideo,
+        row?.codVideo,
+        row?.nCodVideo,
+        row?.urlvideo,
+        row?.videoUrl,
+      ],
+    };
+    ("codsonido");
+
+    const candidates = mediaCandidatesByKey[normalizedKey];
+
+    if (!candidates) return row?.[key];
+
+    return candidates.find((value) => isHttpUrlText(value)) ?? null;
+  };
+
   const getCellRawValue = (row, key) => {
     if (!row) return null;
 
@@ -149,15 +263,23 @@ export default function OrdenGenerationTable({
       );
     }
 
-    if (key === "codsonido") {
-      return (
-        row.nCodsonido ??
-        row.nCodSonido ??
-        row.urlsonido ??
-        row.soundUrl ??
-        row.codsonido ??
-        null
-      );
+    if (key === "codsonido" || key === "nCodsonido") {
+      return getSoundUrlCellValue(row);
+    }
+
+    const normalizedKey = getNormalizedKey(key);
+
+    if (
+      normalizedKey === "codimagenprincipal" ||
+      normalizedKey === "ncodimagenprincipal" ||
+      normalizedKey === "codimagenscreenshot" ||
+      normalizedKey === "ncodimagenscreenshot" ||
+      normalizedKey === "codimagendialogo" ||
+      normalizedKey === "ncodimagendialogo" ||
+      normalizedKey === "codvideo" ||
+      normalizedKey === "ncodvideo"
+    ) {
+      return getMediaUrlCellValue(row, key);
     }
 
     if (key === "codestadoorden") {

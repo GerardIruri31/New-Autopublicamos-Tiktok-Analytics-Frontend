@@ -13,6 +13,7 @@ const OrderQueriesResponse = {
   codtelefono: null,
   codcuentatiktok: null,
   codsonido: null,
+  nCodsonido: null,
   desscenahook: null,
   descaption: null,
   destropo: null,
@@ -21,9 +22,16 @@ const OrderQueriesResponse = {
   deshashtag: null,
   despalote: null,
   codimagenprincipal: null,
+  nCodimagenprincipal: null,
+
   codimagenscreenshot: null,
+  nCodimagenscreenshot: null,
+
   codimagendialogo: null,
+  nCodimagendialogo: null,
+
   codvideo: null,
+  nCodvideo: null,
   desinstrucciones: null,
   fecplanposteo: null,
   codestadoorden: null,
@@ -86,6 +94,7 @@ export function mapOrderQueriesResponseItem(item = {}) {
     codtelefono: item.codtelefono ?? null,
     codcuentatiktok: item.codcuentatiktok ?? null,
     codsonido: item.codsonido ?? null,
+    nCodsonido: item.nCodsonido ?? item.ncodsonido ?? null,
 
     desscenahook: item.desscenahook ?? null,
     descaption: item.descaption ?? null,
@@ -96,9 +105,13 @@ export function mapOrderQueriesResponseItem(item = {}) {
     despalote: item.despalote ?? null,
 
     codimagenprincipal: item.codimagenprincipal ?? null,
+    nCodimagenprincipal: item.nCodimagenprincipal ?? null,
     codimagenscreenshot: item.codimagenscreenshot ?? null,
+    nCodimagenscreenshot: item.nCodimagenscreenshot ?? null,
     codimagendialogo: item.codimagendialogo ?? null,
+    nCodimagendialogo: item.nCodimagendialogo ?? null,
     codvideo: item.codvideo ?? null,
+    nCodvideo: item.nCodvideo ?? null,
 
     desinstrucciones: item.desinstrucciones ?? null,
     fecplanposteo: item.fecplanposteo ?? null,

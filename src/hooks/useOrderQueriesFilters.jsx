@@ -229,13 +229,7 @@ const normalizeOrderQueryRow = (row) => {
       row?.codescena ??
       null,
 
-    nCodsonido:
-      row?.nCodsonido ??
-      row?.nCodSonido ??
-      row?.urlsonido ??
-      row?.soundUrl ??
-      row?.codsonido ??
-      null,
+    nCodsonido: row?.nCodsonido ?? row?.nCodSonido ?? row?.codsonido ?? null,
 
     nCodimagenprincipal:
       row?.nCodimagenprincipal ??
@@ -1150,7 +1144,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
 
     { key: "nCodescena", header: "Scene Name" },
     { key: "codcuentatiktok", header: "TikTok Account" },
-    { key: "nCodsonido", header: "Sound URL" },
+    { key: "codsonido", header: "Sound URL" },
     { key: "desscenahook", header: "Scene Hook" },
     { key: "descaption", header: "Caption" },
     { key: "destropo", header: "Trope" },
@@ -1264,7 +1258,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
 
   const hydrateOrderVisualLabels = (row) => {
     const normalized = normalizeOrderQueryRow(row);
-    console.log(normalized);
+    //console.log(normalized);
     const codlibro =
       normalized?.codlibro ??
       normalized?.codLibro ??
@@ -1317,7 +1311,7 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
     if (!token) return { ok: false, reason: "no-token" };
 
     setLoadingSearch(true);
-    console.log(requestPayload);
+
     try {
       const response = await searchOrderQueriesService({
         token,
@@ -1905,6 +1899,29 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
           }
         };
 
+        const imageVideoInputFields = [
+          {
+            fieldKey: "codimagenprincipal",
+            inputKey: "newCodImagenPrincipal",
+            label: "Main Image URL",
+          },
+          {
+            fieldKey: "codimagenscreenshot",
+            inputKey: "newCodImagenScreenshot",
+            label: "Screenshot Image URL",
+          },
+          {
+            fieldKey: "codimagendialogo",
+            inputKey: "newCodImagenDialogo",
+            label: "Dialog Image URL",
+          },
+          {
+            fieldKey: "codvideo",
+            inputKey: "newCodVideo",
+            label: "Video URL",
+          },
+        ];
+
         const editCascadeStarted = [
           editFilters.codposteador,
           editFilters.codtelefono,
@@ -1968,6 +1985,58 @@ export function useOrderQueriesFilters({ token, notifySearchValidation } = {}) {
             );
             return;
           }
+        }
+
+        const finalTipPublicacionForImageRules = editCascadeStarted
+          ? editFilters.tippublicacion
+          : (draftOrder?.tippublicacion ?? selectedOrder?.tippublicacion ?? "");
+
+        const finalTipPublicacionLabelForImageRules =
+          getPostTypeLabelByValue(
+            editCascadeStarted
+              ? editCatalog?.tiposPosteo
+              : [
+                  ...(editCatalog?.tiposPosteo || []),
+                  ...(catalog?.tiposPosteo || []),
+                ],
+            finalTipPublicacionForImageRules,
+          ) ??
+          draftOrder?.nTippublicacion ??
+          selectedOrder?.nTippublicacion ??
+          draftOrder?.ntippublicacion ??
+          selectedOrder?.ntippublicacion ??
+          null;
+
+        const allowedImageVideoFieldsForTip =
+          getRequiredImageVideoFieldsByTipPublicacion(
+            requiredImagesPerTipPublicacion,
+            finalTipPublicacionForImageRules,
+            finalTipPublicacionLabelForImageRules,
+          );
+
+        const allowedImageVideoKeys = new Set(
+          allowedImageVideoFieldsForTip.map((field) => field.key),
+        );
+
+        const invalidImageVideoFields = imageVideoInputFields.filter(
+          ({ fieldKey, inputKey }) =>
+            hasValue(newValues[inputKey]) &&
+            !allowedImageVideoKeys.has(fieldKey),
+        );
+
+        if (
+          hasValue(finalTipPublicacionForImageRules) &&
+          allowedImageVideoFieldsForTip.length > 0 &&
+          invalidImageVideoFields.length > 0
+        ) {
+          notify(
+            "Invalid image/video fields",
+            `The selected post type does not allow the following field(s): ${invalidImageVideoFields
+              .map((field) => field.label)
+              .join(", ")}. Remove those URL(s) before saving.`,
+            "error",
+          );
+          return;
         }
 
         const updatedOrder = withAutoPalote({

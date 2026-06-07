@@ -7,6 +7,7 @@ import { useGeneracionOrdenFilters } from "../hooks/useGeneracionOrdenFilters";
 import OrderDetailsModal from "../components/generacionOrden/OrderDetailsModal";
 import { AuthUserContext } from "../context/AuthUserContext";
 import NotificationToast from "../components/common/NotificationToast";
+import { deleteOrderService } from "../services/order-queries/DeleteOrderService";
 import {
   useContext,
   useEffect,
@@ -17,7 +18,7 @@ import {
 import { createPortal } from "react-dom";
 
 export default function GeneracionOrdenFiltersPage() {
-  const { jwt } = useContext(AuthUserContext);
+  const { jwt, userEmail } = useContext(AuthUserContext);
 
   const [toast, setToast] = useState(null);
 
@@ -49,6 +50,51 @@ export default function GeneracionOrdenFiltersPage() {
 
   const notify = (title, message, type = "info") => {
     setToast({ title, message, type });
+  };
+
+  const handleDeleteOrder = async (order) => {
+    const request = {
+      correo: userEmail,
+      codordentrabajo: order.codordentrabajo,
+      codescena: order.codescena ?? order.codescenaauto ?? null,
+      tippublicacion: order.tippublicacion,
+      codlibro: order.codlibro,
+      codcuentatiktok: order.codcuentatiktok,
+      codtelefono: order.codtelefono,
+
+      // En Order Generation estos son códigos internos, no URLs.
+      codimagenprincipal: order.codimagenprincipal,
+      codimagenscreenshot: order.codimagenscreenshot,
+      codimagendialogo: order.codimagendialogo,
+      codvideo: order.codvideo,
+
+      // En Order Generation, por tu DTO:
+      // codsonido = código interno
+      // nCodsonido = URL / valor visible
+      codsonido: order.codsonido,
+    };
+
+    console.log("DELETE ORDER GENERATION - ORDER RECIBIDO:", order);
+    console.log("DELETE ORDER GENERATION - REQUEST:", request);
+
+    try {
+      await deleteOrderService({
+        token: jwt,
+        request,
+      });
+
+      actions.removeOrderRow(order.codordentrabajo);
+
+      notify("Order deleted", "The order was deleted successfully.", "success");
+    } catch (error) {
+      console.error("Delete order failed:", error);
+
+      notify(
+        "Delete failed",
+        error?.message || "Error deleting order.",
+        "error",
+      );
+    }
   };
 
   const handleCloseOrderModal = () => {
@@ -878,6 +924,15 @@ export default function GeneracionOrdenFiltersPage() {
             rows={ordersRows}
             columns={ordersColumns}
             onRowClick={(row) => actions.openDetails(row)}
+            onDeleteRow={(order) => {
+              openConfirm({
+                title: "Confirm order deletion",
+                message: `You are about to permanently delete order #${order?.codordentrabajo ?? "N/A"}. Please confirm this action to proceed.`,
+                confirmText: "Delete",
+                danger: true,
+                onConfirm: () => handleDeleteOrder(order),
+              });
+            }}
           />
         ) : dataLoaded ? (
           <NoDataFound />

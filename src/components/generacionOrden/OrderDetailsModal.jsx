@@ -565,6 +565,31 @@ export default function OrderDetailsModal({
     getOptionValue(opt) ??
     "";
 
+  const isHttpUrlText = (value) => {
+    const text = String(value ?? "").trim();
+
+    if (!text) return false;
+    if (text.toLowerCase() === "null") return false;
+
+    return text.startsWith("http://") || text.startsWith("https://");
+  };
+
+  const getSoundUrlDisplayValue = () => {
+    const candidates = [
+      order?.codsonido,
+      order?.nCodsonido,
+      order?.ncodsonido,
+      order?.codSonido,
+      order?.nCodSonido,
+      order?.urlsonido,
+      order?.soundUrl,
+    ];
+
+    const urlValue = candidates.find((value) => isHttpUrlText(value));
+
+    return urlValue ?? "";
+  };
+
   const getOrderDisplayFallback = (fieldKey) => {
     const fallbackMap = {
       codposteador:
@@ -617,11 +642,7 @@ export default function OrderDetailsModal({
         order?.scene ??
         order?.codescena,
 
-      nCodsonido:
-        order?.nCodsonido ??
-        order?.codsonido ??
-        order?.urlsonido ??
-        order?.soundUrl,
+      nCodsonido: getSoundUrlDisplayValue(),
 
       nCodimagenprincipal:
         order?.nCodimagenprincipal ??
@@ -652,6 +673,10 @@ export default function OrderDetailsModal({
   };
 
   const getDisplayValue = (fieldKey) => {
+    if (!isManualMode && fieldKey === "nCodsonido") {
+      return String(getSoundUrlDisplayValue() ?? "");
+    }
+
     const rawValue = isManualMode
       ? (draft?.[fieldKey] ?? "")
       : (order?.[fieldKey] ?? "");

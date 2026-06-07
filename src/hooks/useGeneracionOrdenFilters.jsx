@@ -336,7 +336,7 @@ export function useGeneracionOrdenFilters({
     { key: "nCodescena", header: "Scene Name" },
     { key: "codcuentatiktok", header: "TikTok Account" },
 
-    { key: "codsonido", header: "Sound URL" },
+    { key: "nCodsonido", header: "Sound URL" },
     { key: "desscenahook", header: "Scene Hook" },
     { key: "descaption", header: "Caption" },
     { key: "destropo", header: "Trope" },
@@ -2107,6 +2107,46 @@ export function useGeneracionOrdenFilters({
         setOrdersColumns(mockColumns);
         setOrdersRows(mockRows);
         setDataLoaded(true);
+      },
+
+      removeOrderRow: (codordentrabajo) => {
+        setOrdersRows((prev) =>
+          (prev || []).filter(
+            (row) => String(row?.codordentrabajo) !== String(codordentrabajo),
+          ),
+        );
+
+        setSelectedOrder((prev) =>
+          String(prev?.codordentrabajo) === String(codordentrabajo)
+            ? null
+            : prev,
+        );
+
+        setDraftOrder((prev) =>
+          String(prev?.codordentrabajo) === String(codordentrabajo)
+            ? null
+            : prev,
+        );
+
+        setDetailsOpen((prev) => {
+          if (
+            String(selectedOrder?.codordentrabajo) === String(codordentrabajo)
+          ) {
+            return false;
+          }
+
+          return prev;
+        });
+
+        setIsEditing((prev) => {
+          if (
+            String(selectedOrder?.codordentrabajo) === String(codordentrabajo)
+          ) {
+            return false;
+          }
+
+          return prev;
+        });
       },
       openManualOrder: () => {
         setFilters(buildDefaultFilters());
